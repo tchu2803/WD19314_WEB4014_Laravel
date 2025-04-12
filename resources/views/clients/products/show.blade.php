@@ -125,7 +125,7 @@
 
 @guest
     <div class="alert alert-warning">
-        <i class="bi bi-lock-fill"></i> Vui lòng <a href="{{ route('auths.login') }}">đăng nhập</a> để đánh giá sản phẩm.
+        <i class="bi bi-lock-fill"></i> Vui lòng <a href="{{ route('login') }}">đăng nhập</a> để đánh giá sản phẩm.
     </div>
 @endguest
 
