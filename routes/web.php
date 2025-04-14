@@ -22,6 +22,9 @@ Route::post('/login', [AuthController::class, 'login'])->name('login-post');
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 Route::post('/register', [AuthController::class, 'register'])->name('register-post');
 
+Route::get('auth/google', [AuthController::class, 'redirectToGoogle'])->name('google.login');
+Route::get('auth/google/callback', [AuthController::class, 'handleGoogleCallback'])->name('google.callback');
+
 Route::get('/dashboard', function () {
     return view('admins.dashboard');
 })->name('admins.dashboard')->middleware(['auth', 'admin']);

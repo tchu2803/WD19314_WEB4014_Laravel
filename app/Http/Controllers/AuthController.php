@@ -3,12 +3,16 @@ namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Models\Customer;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Faker\Factory as Faker;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
+use Laravel\Socialite\Facades\Socialite;
 
 class AuthController extends Controller
 {
-
     public function dashboard()
 {
     $user = Auth::user();
@@ -51,6 +55,7 @@ class AuthController extends Controller
 
     public function register(Request $request)
     {
+        $faker = Faker::create();
         $data = $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email',
@@ -65,6 +70,14 @@ class AuthController extends Controller
             'role' => User::ROLE_USER
         ]);
 
+        $customer = Customer::create([
+            'ho_ten' => $data['name'],
+            'email' => $data['email'],
+            'hinh_anh' => $faker->imageUrl(200, 200, 'people', true, 'Faker'),
+            'so_dien_thoai' => $faker->phoneNumber,
+            'dia_chi' => $faker->address
+        ]);
+
         Auth::login($user);
 
         return redirect()->route('admins.dashboard');
@@ -75,4 +88,47 @@ class AuthController extends Controller
         Auth::logout();
         return redirect()->route('login');
     }
+
+    public function redirectToGoogle()
+{
+    return Socialite::driver('google')->redirect();
+}
+public function handleGoogleCallback()
+{
+    try {
+        $faker = Faker::create();
+        $googleUser = Socialite::driver('google')->user();
+
+        // Kiểm tra xem người dùng đã tồn tại
+        $user = User::where('email', $googleUser->getEmail())->first();
+
+        if (!$user) {
+            // Tạo mới user
+            $user = User::create([
+                'name' => $googleUser->getName(),
+                'email' => $googleUser->getEmail(),
+                'password' => bcrypt(Str::random(16)),
+                'role' => User::ROLE_USER
+            ]);
+
+            // Tạo mới customer tương ứng
+            $customer = Customer::create([
+                'ho_ten' => $googleUser->getName(),
+                'email' => $googleUser->getEmail(),
+                'hinh_anh' => $googleUser->getAvatar(),
+                'so_dien_thoai' => $faker->phoneNumber,
+                'dia_chi' => $faker->address
+            ]);
+        }
+
+        Auth::login($user);
+        return redirect()->intended('/');
+
+    } catch (\Exception $e) {
+        // Ghi lại lỗi vào log để kiểm tra chi tiết
+        Log::error('Lỗi đăng nhập Google: ' . $e->getMessage());
+        return redirect('/showLogin')->withErrors(['msg' => 'Đăng nhập Google thất bại!']);
+    }
+}
+
 }
