@@ -45,10 +45,10 @@
             <!-- Nút tìm kiếm -->
             <div class="col-md-2 d-flex">
                 <button type="submit" class="btn btn-dark w-100 me-1">
-                    <i class="fas fa-search"></i> Tìm
+                    <i class="fa fa-search"></i> Tìm
                 </button>
                 <a href="{{ route('clients.products.index') }}" class="btn btn-secondary w-100 ms-1">
-                    <i class="fas fa-sync"></i> Reset
+                    <i class="fa fa-sync"></i> Reset
                 </a>
             </div>
         </div>
@@ -70,7 +70,8 @@
                             <h5 class="fw-bolder">{{ $product->ten_san_pham }}</h5>
                             @if ($product->gia_khuyen_mai > 0)
                                 <span class="text-muted text-decoration-line-through">{{ number_format($product->gia) }} VNĐ</span>
-                                <span class="ms-2 text-danger">{{ number_format($product->gia_khuyen_mai) }} VNĐ</span>
+                                <br>
+                                <span class="ms-2 text-danger mr-2">{{ number_format($product->gia_khuyen_mai) }} VNĐ</span>
                             @else
                                 <span>{{ number_format($product->gia) }} VNĐ</span>
                             @endif
@@ -88,6 +89,7 @@
         @endforeach
     </div>
 
+    
 <!-- Phân trang -->
 @if ($products->hasPages())
     <nav aria-label="Page navigation" class="mt-4">
