@@ -31,14 +31,14 @@
                     <hr class="mt-3">
                     <div class="text-center mt-3">
                     <a href="{{ route('register')}}" class=" btn btn-success w-50">Đăng kí</a>
+                    <a href="{{ url('auths/google') }}">
+                        <img src="https://developers.google.com/identity/images/btn_google_signin_light_normal_web.png" alt="Sign in with Google">
+                    </a>
                 </div>
                 </form>
             </div>
         </div>
     </div>
-    <a href="{{ route('google.login') }}">
-        <img src="https://developers.google.com/identity/images/btn_google_signin_light_normal_web.png" alt="Sign in with Google">
-    </a>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
 @endsection

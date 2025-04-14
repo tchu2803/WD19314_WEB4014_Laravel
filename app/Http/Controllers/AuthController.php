@@ -13,6 +13,7 @@ use Laravel\Socialite\Facades\Socialite;
 
 class AuthController extends Controller
 {
+
     public function dashboard()
 {
     $user = Auth::user();
@@ -46,7 +47,7 @@ class AuthController extends Controller
             if ($user->role === 'admin') {
                 return redirect()->route('admins.dashboard'); // Chuyển hướng đến trang admin
             } elseif ($user->role === 'user') {
-                return redirect()->route('clients.home'); // Chuyển hướng đến trang client
+                return redirect()->route('clients/home'); // Chuyển hướng đến trang client
             }
         }
 
@@ -90,9 +91,11 @@ class AuthController extends Controller
     }
 
     public function redirectToGoogle()
-{
-    return Socialite::driver('google')->redirect();
-}
+    {
+        return Socialite::driver('google')
+            ->redirect();
+    }
+
 public function handleGoogleCallback()
 {
     try {
@@ -122,7 +125,7 @@ public function handleGoogleCallback()
         }
 
         Auth::login($user);
-        return redirect()->intended('/');
+        return redirect()->route('clients.home');
 
     } catch (\Exception $e) {
         // Ghi lại lỗi vào log để kiểm tra chi tiết
