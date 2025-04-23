@@ -43,19 +43,14 @@
               </span>
             </a>
             @else
-            <form action="{{ route('logout') }}" method="POST">
+            <form action="{{ route('logout') }}" method="POST" class="d-inline">
                 @csrf
-                <li>
-                    <button type="submit">
-                        <i aria-hidden="true"></i>
-                        <span>
-                          Đăng xuất
-                        </span>
-                    </button>
-                </li>
+                <button type="submit" class="btn btn-danger btn-sm mr-3 mt-1">
+                    <i class="fas fa-sign-out-alt"></i> Đăng xuất
+                </button>
             </form>
             @endif
-            <a href="">
+            <a href="{{ route('clients.carts.index') }}">
               <i class="fa fa-shopping-bag" aria-hidden="true"></i>
             </a>
             <form class="form-inline ">

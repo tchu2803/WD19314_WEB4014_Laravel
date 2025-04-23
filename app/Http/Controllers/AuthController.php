@@ -2,12 +2,14 @@
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Mail\WelcomeMail;
 use App\Models\User;
 use App\Models\Customer;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Faker\Factory as Faker;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 use Laravel\Socialite\Facades\Socialite;
 
@@ -78,7 +80,11 @@ class AuthController extends Controller
             'so_dien_thoai' => $faker->phoneNumber,
             'dia_chi' => $faker->address
         ]);
-
+        if($user) {
+            // Nếu sử dụng queue thì cần chạy lệnh queue:work và php artisan ser
+            Mail::to($user->email)->queue(new WelcomeMail($user));
+            // Mail::to($user->email)->send(new WelcomeMail($user));
+        }
         Auth::login($user);
 
         return redirect()->route('admins.dashboard');
@@ -87,6 +93,9 @@ class AuthController extends Controller
     public function logout()
     {
         Auth::logout();
+        session_start();
+        session_unset();
+        session_destroy();
         return redirect()->route('login');
     }
 

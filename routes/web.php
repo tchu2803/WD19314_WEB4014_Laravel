@@ -127,6 +127,7 @@ Route::prefix('admins')->middleware(['auth', 'admin'])->name('admins.')->group(f
 
 Route::prefix('clients')->name('clients.')->group(function () {
     Route::get('/home', [HomeController::class, 'home'])->name('home');
+
     Route::prefix('products')->name('products.')->group(function (): void {
         Route::get('/', [HomeController::class, 'index'])->name('index');
         Route::get('/{id}/show', [HomeController::class, 'show'])->name('show');
@@ -135,6 +136,19 @@ Route::prefix('clients')->name('clients.')->group(function () {
     });
     Route::get('/posts', [HomeController::class, 'post'])->name('post');
     Route::get('/contact', [HomeController::class, 'contact'])->name('contact');
+
+    Route::prefix('carts')->name('carts.')->group(function (): void {
+        Route::get('/', [HomeController::class, 'viewCart'])->name('index');
+        Route::post('/add', [HomeController::class, 'addToCart'])->name('add');
+        Route::put('/{id}/update', [HomeController::class, 'updateCart'])->name('update');
+        Route::delete('/{id}/delete', [HomeController::class, 'deleteCart'])->name('delete');
+    });
+
+    Route::prefix('orders')->name('orders.')->group(function (): void {
+        Route::get('/', [HomeController::class, 'checkout'])->name('index');
+        Route::post('/placeOrder', [HomeController::class, 'placeOrder'])->name('placeOrder');
+        Route::get('/{id}/success', [HomeController::class, 'successOrder'])->name('successOrder');
+    });
 });
 
 

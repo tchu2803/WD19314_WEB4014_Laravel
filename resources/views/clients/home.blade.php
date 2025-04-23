@@ -21,14 +21,14 @@
                                             Samsung, Xiaomi, Oppo,... cùng với chế độ bảo hành uy tín và đội ngũ tư vấn
                                             nhiệt tình. Hãy khám phá thế giới công nghệ hiện đại chỉ với vài cú nhấp chuột!
                                         </p>
-                                        <a href="/clients/contact">
+                                        <a href="/clients/contact" class="text-decoration-none">
                                             Liên hệ với chúng tôi
                                         </a>
                                     </div>
                                 </div>
-                                <div class="col-md-5 ">
+                                <div class="col-md-5">
                                     <div class="img-box">
-                                        <img src="{{ asset('storage/images/products/9MdJy4vfRI2UbbxXPIrDSYvCAGQaTAWlB7RmR1tq.webp')}}"/>
+                                       
                                     </div>
                                 </div>
                             </div>
@@ -49,39 +49,40 @@
                     Sản phẩm mới nhất
                 </h2>
             </div>
-            <div class="row">
-                @foreach ($products as $product)
-                    <div class="col-sm-6 col-md-4 col-lg-3">
-                        <div class="box">
-                            <a href="{{ route('clients.products.show', $product->id) }}">
-                                <div class="img-box">
-                                    <img src="{{ asset('storage/' . $product->hinh_anh) }}">
-                                </div>
-                                <div class="detail-box">
-                                    <h6>
-                                        {{ $product->ten_san_pham }}
-                                    </h6>
-                                    <h6>
-                                        <span>
-                                            @if (isset($product->gia_khuyen_mai) && $product->gia_khuyen_mai > 0)
-                                                <span>
-                                                    {{ number_format($product->gia_khuyen_mai) }} VNĐ
-                                                </span>
-                                            @else
-                                                <span>{{ number_format($product->gia) }} VNĐ</span>
-                                            @endif
-                                        </span>
-                                    </h6>
-                                </div>
-                                <div class="new">
-                                    <span>
-                                        New
-                                    </span>
-                                </div>
-                            </a>
+            <!-- Danh sách sản phẩm -->
+    <div class="row gx-4 gx-lg-5 row-cols-2 row-cols-md-3 row-cols-xl-4 justify-content-center">
+        @foreach ($products as $product)
+            <div class="col mb-5">
+                <div class="card h-100">
+                    <!-- Hình ảnh -->
+                    <div style="height: 200px; overflow: hidden;">
+                        <img src="{{ asset('storage/' . $product->hinh_anh) }}" class="card-img-top" style="object-fit: cover; height: 100%; width: 100%;">
+                    </div>
+
+                    <!-- Thông tin sản phẩm -->
+                    <div class="card-body p-4">
+                        <div class="text-center">
+                            <h5 class="fw-bolder">{{ $product->ten_san_pham }}</h5>
+                            @if ($product->gia_khuyen_mai > 0)
+                                <span class="text-muted text-decoration-line-through">{{ number_format($product->gia) }} VNĐ</span>
+                                <br>
+                                <span class="ms-2 text-danger mr-2">{{ number_format($product->gia_khuyen_mai) }} VNĐ</span>
+                            @else
+                                <span>{{ number_format($product->gia) }} VNĐ</span>
+                            @endif
                         </div>
                     </div>
-                    @endforeach
+
+                    <!-- Nút hành động -->
+                    <div class="card-footer p-4 pt-0 border-top-0 bg-transparent">
+                        <div class="text-center">
+                            <a class="btn btn-outline-dark mt-auto" href="{{ route('clients.products.show', $product->id) }}">Xem</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        @endforeach
+    </div>
             </div>
             <div class="btn-box">
                 <a href="/clients/products">

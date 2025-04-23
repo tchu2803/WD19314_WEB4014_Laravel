@@ -3,14 +3,20 @@
 namespace App\Http\Controllers;
 
 use App\Models\Banner;
+use App\Models\Cart;
 use App\Models\Category;
 use App\Models\Contact;
+use App\Models\Customer;
 use App\Models\Post;
 use App\Models\Product;
 use App\Models\Review;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use App\Mail\OrderMail;
+use App\Models\Order;
+use Illuminate\Support\Facades\Mail;
+
 
 class HomeController extends Controller
 {
@@ -26,6 +32,8 @@ class HomeController extends Controller
 
     private Contact $contact;
 
+    private Customer $customer;
+
     public function __construct()
     {
         $this->product = new Product();
@@ -34,6 +42,7 @@ class HomeController extends Controller
         $this->review = new Review();
         $this->category = new Category();
         $this->contact = new Contact();
+        $this->customer = new Customer();
     }
 
     public function home(Request $request)
@@ -120,4 +129,126 @@ class HomeController extends Controller
     {
         return view('clients.contacts.send');
     }
+
+    public function viewCart()
+    {
+        $cartItems = Cart::with('customer', 'product')->get();
+
+        return view('clients.carts.index', compact('cartItems'));
+    }
+
+    public function addToCart(Request $request)
+{
+    $user = Auth::user();
+
+    $product = Product::findOrFail($request->ma_san_pham);
+    $quantity = $request->input('so_luong', 1);
+
+    $cartItem = Cart::where('ma_khach_hang', $user->id)
+                    ->where('ma_san_pham', $product->id)
+                    ->first();
+
+    if ($cartItem) {
+        $cartItem->so_luong += $quantity;
+        $cartItem->save();
+    } else {
+        Cart::create([
+            'ma_khach_hang' => $user->id,
+            'ma_san_pham' => $product->id,
+            'so_luong' => $quantity,
+            'gia' => $product->gia,
+            'gia_khuyen_mai' => $product->gia_khuyen_mai,
+        ]);
+    }
+
+    return redirect()->back();
+}
+
+    public function deleteCart($id)
+    {
+        $cartItem = Cart::findOrFail($id);
+        $cartItem->delete();
+
+        return redirect()->back()->with('success', 'Đã xóa sản phẩm khỏi giỏ hàng!');
+    }
+
+    public function updateCart(Request $request, $id)
+    {
+        $cartItem = Cart::findOrFail($id);
+    
+        if ($request->has('increase')) {
+            $cartItem->so_luong += 1;
+        } elseif ($request->has('decrease')) {
+            if ($cartItem->so_luong > 1) {
+                $cartItem->so_luong -= 1;
+            }
+        }
+    
+        $cartItem->save();
+    
+        return redirect()->back();
+    }
+
+    public function checkout()
+    {
+        $cartItems = Cart::with('customer', 'product')->get();
+
+    $total = $cartItems->sum(function ($item) {
+        $price = $item->gia_khuyen_mai ?? $item->gia;
+        return $price * $item->so_luong;
+    });
+
+    $subtotal = $cartItems->sum(function ($item) {
+        return $item->gia * $item->so_luong;
+    });
+
+    // Nếu bạn dùng phí vận chuyển mặc định
+    $shippingFee = session('shipping_fee', 30000);
+    $tongThanhToan = $total + $shippingFee;
+
+    return view('clients.orders.index', compact('cartItems', 'subtotal', 'total', 'shippingFee', 'tongThanhToan'));
+    }
+
+    public function placeOrder(Request $request)
+    {
+        $validated = $request->validate([
+            'ho_ten' => 'required|string|max:255',
+            'email' => 'required|email|max:255',
+            'so_dien_thoai' => 'required|string|min:9|max:20',
+            'dia_chi' => 'required|string|max:500',
+        ]);
+    
+        $user = Auth::user();
+
+        $cartItems = Cart::where('ma_khach_hang', $user->id)->get();
+    
+        if ($cartItems->isEmpty()) {
+            return redirect()->route('clients.carts.index')->with('error', 'Giỏ hàng của bạn đang trống.');
+        }
+    
+        $total = $cartItems->sum(function ($item) {
+            $price = $item->gia_khuyen_mai ?? $item->gia;
+            return $price * $item->so_luong;
+        });
+    
+        $order = Order::create($validated + [
+            'ma_khach_hang' => $user->id,
+            'tong_tien' => $total,
+            'trang_thai' => 'chờ xử lý',
+            'phuong_thuc_thanh_toan' => $request->phuong_thuc_thanh_toan,
+        ]);
+    
+        Mail::to($order->email)->queue(new OrderMail($order));
+    
+        Cart::where('ma_khach_hang', $user->id)->delete();
+    
+        return redirect()->route('clients.orders.successOrder', ['id' => $order->id]);
+    }
+
+    public function successOrder($id)
+    {
+        $order = Order::findOrFail($id);
+        return view('clients.orders.success', compact('order'));
+    }
+    
 }

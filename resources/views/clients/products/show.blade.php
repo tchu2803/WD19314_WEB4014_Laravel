@@ -1,6 +1,14 @@
 @extends('clients.layouts.main')
 
 @section('content')
+
+@if (session('success'))
+<div class="alert alert-success alert-dismissible fade show mt-3" role="alert">
+    <strong>{{ session('success') }}</strong>
+    <button type="button" class="btn btn-outline-dark btn-close ml-2" data-bs-dismiss="alert"  aria-label="Close">Đóng</button>
+</div>
+@endif
+
 <div class="container mt-5">
     <div class="row">
         <!-- Chi tiết sản phẩm -->
@@ -40,10 +48,10 @@
                 </p>
 
                 @if($product->trang_thai == 1)
-                    <form action="#" method="POST" class="mt-3">
+                    <form action="{{ route('clients.carts.add')}}" method="POST" class="mt-3" enctype="multipart/form-data">
                         @csrf
-
                         <div class="form-group mb-0">
+                            <input type="hidden" name="ma_san_pham" value="{{ $product->id }}">
                             <label for="so_luong" class="form-label mb-1"><strong>Số lượng:</strong></label>
                             <input type="number" name="so_luong" id="so_luong" class="form-control" value="1" min="1" max="99" style="width: 100px;">
                         </div>
@@ -133,7 +141,7 @@
 @forelse ($reviews as $review)
     <div class="card mb-3">
         <div class="card-body">
-            <strong class="fst-italic">{{ $review->user->name ?? 'Ẩn danh' }}</strong> 
+            <strong class="fst-italic">{{ $review->customer->ho_ten ?? 'Ẩn danh' }}</strong> 
             <span class="text-warning ml-2">
                 @for ($i = 1; $i <= 5; $i++)
                     <i class="bi {{ $i <= $review->so_sao ? 'bi-star-fill' : 'bi-star' }}"></i>
